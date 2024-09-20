@@ -1,0 +1,18 @@
+Desarrollar un menú interactivo por consola que permita a un usuario operar con las siguientes funciones:
+● Registrar una persona indicando:
+    - Nombre
+    - Apellido
+    - DNI
+    - Fecha de nacimiento
+- Email
+● Registrar una tarjeta indicando:
+    - Marca
+    - Número
+    - Fecha de vencimiento
+    - Nombre completo del titular
+● Retornar información de las tarjetas asociadas de un usuario por dni
+● Consultar las tasas de todas las marcas por fecha
+(Si no se envía una fecha, se toma la fecha actual, formato dd-MM-yyyy)
+
+IMPORTANTE: Realizar el correspondiente manejo de excepciones en casos de error
+
