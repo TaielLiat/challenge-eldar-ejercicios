@@ -6,6 +6,7 @@ import com.eldar.challenge.ejercicio2.entity.User;
 import com.eldar.challenge.ejercicio2.repository.OperationRepository;
 import com.eldar.challenge.ejercicio2.service.CardService;
 import com.eldar.challenge.ejercicio2.service.OperationService;
+import com.eldar.challenge.ejercicio2.utils.EmailSender;
 import com.eldar.challenge.ejercicio2.utils.Validations;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,12 @@ class OperationServiceTest {
 
     @Mock
     private JavaMailSender mailSender;
+
+    @Mock
+    private EmailSender emailSender;
+
+    @Mock
+    Validations validations;
 
     @InjectMocks
     private OperationService operationService;
@@ -66,6 +73,7 @@ class OperationServiceTest {
         operation.setDate(LocalDate.now());
 
         when(cardService.getCardById(card.getId())).thenReturn(Optional.of(card));
+        doNothing().when(emailSender).sendPurchaseNotification(any(Operation.class));
     }
 
     @Test
@@ -80,7 +88,9 @@ class OperationServiceTest {
     }
 
     @Test
-    void testInvalidCVV() { // CVV incorrecto
+    void testInvalidCVV() throws Exception { // CVV incorrecto
+        doThrow(new Exception("El CVV ingresado es incorrecto.")).when(validations).validateCard(any(Card.class), eq("999"));
+
         Exception exception = assertThrows(Exception.class, () -> {
             operationService.createOperation(operation, "999");
         });
@@ -89,8 +99,9 @@ class OperationServiceTest {
     }
 
     @Test
-    void testExpiredCard() {
+    void testExpiredCard() throws Exception {
         card.setExpiryDate(LocalDate.now().minusDays(1));
+        doThrow(new Exception("La tarjeta asociada está vencida.")).when(validations).validateCard(any(Card.class), eq("123"));
 
         Exception exception = assertThrows(Exception.class, () -> {
             operationService.createOperation(operation, "123");
@@ -103,6 +114,9 @@ class OperationServiceTest {
     void testNonExistentCard() throws Exception {
         when(cardService.getCardById(any(UUID.class))).thenReturn(Optional.empty());
 
+        doThrow(new Exception("La tarjeta asociada no existe en el sistema."))
+                .when(validations).validateCard(any(Card.class), eq("123"));
+
         Exception exception = assertThrows(Exception.class, () -> {
             operationService.createOperation(operation, "123");
         });
@@ -110,10 +124,11 @@ class OperationServiceTest {
         assertEquals("La tarjeta asociada no existe en el sistema.", exception.getMessage());
     }
 
-    @Test
-    void testExcessiveAmount() {
-        operation.setAmount(15000.0); // limite actual 10,000
 
+    @Test
+    void testExcessiveAmount() throws Exception {
+        operation.setAmount(15000.0); // limite actual 10,000
+        doThrow(new Exception("El monto de la operación excede los $10.000 pesos.")).when(validations).validateOperationAmount(15000.0);
         Exception exception = assertThrows(Exception.class, () -> {
             operationService.createOperation(operation, "123");
         });
@@ -122,11 +137,11 @@ class OperationServiceTest {
     }
 
     @Test
-    void testValidateExpiredCard() {
+    void testValidateExpiredCard() throws Exception {
         card.setExpiryDate(LocalDate.now().minusDays(1));
+        doThrow(new Exception("La tarjeta está vencida.")).when(validations).validateCard(card, "123");
 
         Exception exception = assertThrows(Exception.class, () -> {
-            Validations validations = new Validations();
             validations.validateCard(card, "123");
         });
 
