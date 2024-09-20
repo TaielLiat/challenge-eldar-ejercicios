@@ -6,6 +6,7 @@ import com.eldar.challenge.ejercicio2.entity.User;
 import com.eldar.challenge.ejercicio2.repository.OperationRepository;
 import com.eldar.challenge.ejercicio2.service.CardService;
 import com.eldar.challenge.ejercicio2.service.OperationService;
+import com.eldar.challenge.ejercicio2.utils.Validations;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -99,6 +100,17 @@ class OperationServiceTest {
     }
 
     @Test
+    void testNonExistentCard() throws Exception {
+        when(cardService.getCardById(any(UUID.class))).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(Exception.class, () -> {
+            operationService.createOperation(operation, "123");
+        });
+
+        assertEquals("La tarjeta asociada no existe en el sistema.", exception.getMessage());
+    }
+
+    @Test
     void testExcessiveAmount() {
         operation.setAmount(15000.0); // limite actual 10,000
 
@@ -109,6 +121,16 @@ class OperationServiceTest {
         assertEquals("El monto de la operación excede los $10.000 pesos.", exception.getMessage());
     }
 
+    @Test
+    void testValidateExpiredCard() {
+        card.setExpiryDate(LocalDate.now().minusDays(1));
 
+        Exception exception = assertThrows(Exception.class, () -> {
+            Validations validations = new Validations();
+            validations.validateCard(card, "123");
+        });
+
+        assertEquals("La tarjeta está vencida.", exception.getMessage());
+    }
 
 }

@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.eldar.challenge.ejercicio2.utils.Encryption.encryptCVV;
+
+
 @Service
 public class CardService {
 
@@ -19,6 +22,8 @@ public class CardService {
 
     @Autowired
     private UserRepository userRepository;
+
+    String SECRET_KEY = System.getenv("SECRET_KEY");
 
     public Card createCard(Card card, UUID userId) throws Exception {
         Optional<User> user = userRepository.findById(userId);
@@ -31,8 +36,7 @@ public class CardService {
         }
 
         card.setUser(user.get());
-        String encryptedCVV = encryptCVV(card.getCvv());
-        card.setCvv(encryptedCVV);
+        card.setCvv(encryptCVV(card.getCvv(), SECRET_KEY));
 
         return cardRepository.save(card);
     }
@@ -68,7 +72,7 @@ public class CardService {
         card.setCardNumber(updatedCard.getCardNumber());
         card.setBrand(updatedCard.getBrand());
         card.setExpiryDate(updatedCard.getExpiryDate());
-        card.setCvv(encryptCVV(updatedCard.getCvv()));
+        card.setCvv(encryptCVV(updatedCard.getCvv(), SECRET_KEY));
 
         return cardRepository.save(card);
     }
@@ -86,10 +90,5 @@ public class CardService {
             throw new Exception("La tarjeta está vencida.");
         }
     }
-
-    private String encryptCVV(String cvv) {
-        return cvv;
-    }
-
 
 }
