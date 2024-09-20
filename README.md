@@ -48,3 +48,54 @@ Para correr este proyecto, vas a necesitar modificar los valores del `applicatio
 
 `SECRET_KEY` 
 
+##
+
+Para visualizar los endpoints podés ingresar a:
+http://localhost:8080/swagger-ui/index.html#/
+
+Algunos valores manuales de prueba:
+
+POST: USER
+```bash
+{
+  "id": "42a8f0f5-cdb3-436b-a34c-58f0e62d0c10",
+  "name": "Martin Colapinto",
+  "email": "martincolapinto@gmail.com",
+  "dni": "53600397",
+  "birthDate": "1990-01-01",
+  "cards": null
+}
+```
+POST: CARD
+```bash
+ {
+  "id": "2d49bb0a-94b8-41ea-a4f7-2bfa97337417",
+  "cardNumber": "7041100933440973",
+  "brand": "VISA",
+  "expiryDate": "2025-09-20",
+  "cvv": "123",
+  "expired": false
+}
+```
+POST: OPERATION
+```bash
+{
+  "card": {
+    "id": "2d49bb0a-94b8-41ea-a4f7-2bfa97337417",
+    "cardNumber": "7041100933440973",
+    "brand": "VISA",
+    "expiryDate": "2025-09-20",
+    "cvv": "123",
+    "expired": false
+  },
+  "user": {
+    "id": "42a8f0f5-cdb3-436b-a34c-58f0e62d0c10",  
+    "name": "Martin Colapinto",
+    "email": "martincolapinto@gmail.com",
+    "dni": "53600397",
+    "birthDate": "1990-01-01"
+  },
+  "amount": 5000,
+  "date": "2024-09-20"
+}
+```
